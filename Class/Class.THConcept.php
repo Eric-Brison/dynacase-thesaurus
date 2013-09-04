@@ -167,7 +167,7 @@ class Thconcept extends Family\Document
      * return localized label
      * @param string $lang languqge : simple notation like en,fr,ru,es
      */
-    function getLabelLang($lang = false)
+    function getLabelLang($lang = false, $getFirstIfFailed = true)
     {
         if ($lang === false) $lang = strtolower(strtok(getParam("CORE_LANG") , '_'));
         $tlang = $this->getMultipleRawValues(MyAttributes::thc_lang);
@@ -182,14 +182,26 @@ class Thconcept extends Family\Document
             }
         }
         
-        return (isset($tll[$kgood])) ? $tll[$kgood] : '';
+        $label = (isset($tll[$kgood])) ? $tll[$kgood] : '';
+        if ($getFirstIfFailed && !$label) {
+            $label = isset($tll[0]) ? $tll[0] : '';
+        }
+        return $label;
     }
     /**
      * return localized title
      */
     function getLangTitle($lang = false)
     {
-        $label = trim($this->getRawValue(MyAttributes::thc_label) . ' ' . $this->getLabelLang($lang));
+        $label = $this->getLabelLang($lang, false);
+        if ($label) {
+            $label = trim($this->getRawValue(MyAttributes::thc_label) . ' ' . $label);
+        }
+        if ($label == '') {
+            if ($this->getRawValue(MyAttributes::thc_label)) {
+                $label = trim($this->getRawValue(MyAttributes::thc_label) . ' ' . $this->getLabelLang($lang));
+            }
+        }
         if ($label == '') {
             $label = $this->getRawValue(MyAttributes::thc_preflabel);
         }
