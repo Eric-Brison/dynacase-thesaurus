@@ -6,10 +6,13 @@
 */
 
 global $app_const;
-
+$familyConfiguration=array(
+  "*" => array("paginationType"=> "documentNumber")
+  );
 $app_const = array(
     "INIT" => "yes",
     "VERSION" => "@VERSION@-@RELEASE@",
-    "ONEFAM_MIDS" => "THESAURUS,THCONCEPT,THLANGCONCEPT"
+    "ONEFAM_MIDS" => "THESAURUS,THCONCEPT,THLANGCONCEPT",
+    "ONEFAM_FAMCONFIG"=>json_encode($familyConfiguration)
 );
 ?>

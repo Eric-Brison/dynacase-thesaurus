@@ -7,9 +7,8 @@
 
 namespace Dcp\Thesaurus;
 use \Dcp\AttributeIdentifiers as Attributes;
-use \Dcp\AttributeIdentifiers\Thesaurus as MyAttributes;
-use \Dcp\Family as Family;
 
+use \Dcp\Family as Family;
 
 class Thesaurus extends Family\Document
 {
@@ -171,19 +170,15 @@ class Thesaurus extends Family\Document
             $tout[$k]["newOrder"] = implode(".", $tTitleOrder);
         }
         
-        usort($tout, array(
-            get_class($this) ,
-            "_cmpthorder"
-        ));
+        usort($tout, function ($a, $b)
+        {
+            return $this->_cmpthorder($a, $b);
+        });
         $this->lay->setBlockData("CONCEPTS", $tout);
     }
     /**
      * to sort concept
      */
-    static private function _cmptitle($a, $b)
-    {
-        return strcmp($a['rawTitle'], $b['rawTitle']);
-    }
     static private function _cmpthorder($a, $b)
     {
         return version_compare($a['newOrder'], $b['newOrder']);

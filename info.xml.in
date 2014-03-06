@@ -9,7 +9,7 @@
   </replaces>
 
   <requires>
-        <module name="dynacase-core" comp="ge" version="3.2.12" />
+        <module name="dynacase-core" comp="ge" version="3.3.0" />
         <module name="dynacase-onefam" comp="ge" version="3.2.5" />
   </requires>
 

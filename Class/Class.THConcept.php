@@ -37,11 +37,11 @@ class Thconcept extends Family\Document
     {
         include_once ("FDL/Class.SearchDoc.php");
         $s = new \SearchDoc($this->dbaccess, "THCONCEPT");
-        $s->addFilter("thc_thesaurus='" . intval($this->getRawValue("thc_thesaurus")) . "'");
-        $s->addFilter("thc_broader='" . $this->id . "'"); // $s->addFilter("thc_broader ~ '\\\\y$id\\\\y'); // if many
+        $s->addFilter("thc_thesaurus='%d'", $this->getRawValue("thc_thesaurus"));
+        $s->addFilter("'%d' = any(thc_broader)", $this->id);
         $t = $s->search();
         $tid = array();
-        foreach ($t as $k => $v) {
+        foreach ($t as $v) {
             $tid[] = $v["initid"];
         }
         $this->setValue(MyAttributes::thc_narrower, $tid);
@@ -101,7 +101,7 @@ class Thconcept extends Family\Document
         include_once ("THESAURUS/Lib.Thesaurus.php");
         $langs = getLangConcepts($this->dbaccess, $this->initid);
         $tlang = $tlangid = $tlanglabel = array();
-        foreach ($langs as $k => $v) {
+        foreach ($langs as $v) {
             $tlang[] = $v["thcl_lang"];
             $tlangid[] = $v["initid"];
             $tlanglabel[] = $v["thc_preflabel"];
@@ -115,10 +115,12 @@ class Thconcept extends Family\Document
      */
     function getParentConcept()
     {
-        $gen = $this->getRawValue(MyAttributes::thc_broader);
+        $gen = $this->getAttributeValue(MyAttributes::thc_broader);
         if ($gen) {
-            $d = new_doc($this->dbaccess, $gen);
-            if ($d->isAlive()) return $d;
+            foreach ($gen as $genid) {
+                $d = new_doc($this->dbaccess, $genid);
+                if ($d->isAlive()) return $d;
+            }
         }
         return false;
     }
@@ -139,11 +141,10 @@ class Thconcept extends Family\Document
      */
     function getRNarrowers()
     {
-        $pid = array();
         $nrs = $this->getMultipleRawValues(MyAttributes::thc_narrower);
         $nrsdoc = getDocsFromIds($this->dbaccess, $nrs, 1);
         
-        foreach ($nrsdoc as $k => $nr) {
+        foreach ($nrsdoc as $nr) {
             $nrs = array_merge($nrs, $this->_getRNarrowers(\Doc::rawValueToArray($nr[MyAttributes::thc_narrower])));
         }
         return $nrs;
@@ -155,7 +156,7 @@ class Thconcept extends Family\Document
     {
         $_nrs = $nrs;
         
-        foreach ($nrs as $k => $nr) {
+        foreach ($nrs as $nr) {
             $t = getTDoc($this->dbaccess, $nr);
             $_nrs1 = \Doc::rawValueToArray($t[MyAttributes::thc_narrower]);
             $_nrs2 = $this->_getRNarrowers($_nrs1);
@@ -165,7 +166,8 @@ class Thconcept extends Family\Document
     }
     /**
      * return localized label
-     * @param string $lang languqge : simple notation like en,fr,ru,es
+     * @param bool|string $lang language : simple notation like en,fr,ru,es
+     * @return string
      */
     function getLabelLang($lang = false)
     {
@@ -189,11 +191,11 @@ class Thconcept extends Family\Document
      */
     function getLangTitle($lang = false)
     {
-        $langLabel=$this->getLabelLang($lang);
+        $langLabel = $this->getLabelLang($lang);
         if ($langLabel == '') {
-            $langLabel=$this->getRawValue(MyAttributes::thc_preflabel);
+            $langLabel = $this->getRawValue(MyAttributes::thc_preflabel);
         }
-        $label = trim($this->getRawValue(MyAttributes::thc_label) . ' ' .$langLabel );
+        $label = trim($this->getRawValue(MyAttributes::thc_label) . ' ' . $langLabel);
         
         if ($label == '') {
             $label = $this->getRawValue(MyAttributes::thc_uri);

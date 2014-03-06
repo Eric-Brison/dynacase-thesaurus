@@ -19,7 +19,7 @@ function getConceptFromURI($dbaccess, $uri)
 {
     $s = new SearchDoc($dbaccess, "THCONCEPT");
     //  $s->addFilter("thc_thesaurus=".$this->getValue("thc_thesaurus"));
-    $s->addFilter("thc_uri='" . pg_escape_string($uri) . "'");
+    $s->addFilter("thc_uri='%s'", $uri);
     $s->setObjectReturn();
     $s->overrideViewControl();
     $t = $s->search();
@@ -36,7 +36,7 @@ function getConceptIdFromURI($dbaccess, $uri)
 {
     $s = new SearchDoc($dbaccess, "THCONCEPT");
     //  $s->addFilter("thc_thesaurus=".$this->getValue("thc_thesaurus"));
-    $s->addFilter("thc_uri='" . pg_escape_string($uri) . "'");
+    $s->addFilter("thc_uri='%s'", $uri);
     
     $s->overrideViewControl();
     $t = $s->search();
@@ -53,7 +53,7 @@ function getThesaurusFromURI($dbaccess, $uri)
 {
     $s = new SearchDoc($dbaccess, "THESAURUS");
     //  $s->addFilter("thc_thesaurus=".$this->getValue("thc_thesaurus"));
-    $s->addFilter("thes_uri='" . pg_escape_string($uri) . "'");
+    $s->addFilter("thes_uri='%s'", $uri);
     $s->setObjectReturn();
     $s->overrideViewControl();
     $t = $s->search();
@@ -71,8 +71,8 @@ function getLangConcept($dbaccess, $idc, $lang)
 {
     $s = new SearchDoc($dbaccess, "THLANGCONCEPT");
     //  $s->addFilter("thc_thesaurus=".$this->getValue("thc_thesaurus"));
-    $s->addFilter("thcl_thconcept='" . pg_escape_string($idc) . "'");
-    $s->addFilter("thcl_lang='" . pg_escape_string($lang) . "'");
+    $s->addFilter("thcl_thconcept='%s'", $idc);
+    $s->addFilter("thcl_lang='%s'", $lang);
     
     $s->setObjectReturn();
     $s->overrideViewControl();
@@ -91,7 +91,7 @@ function getLangConcepts($dbaccess, $idc)
 {
     $s = new SearchDoc($dbaccess, "THLANGCONCEPT");
     //  $s->addFilter("thc_thesaurus=".$this->getValue("thc_thesaurus"));
-    $s->addFilter("thcl_thconcept='" . pg_escape_string($idc) . "'");
+    $s->addFilter("thcl_thconcept='%s'", $idc);
     $s->overrideViewControl();
     
     $t = $s->search();
@@ -107,8 +107,8 @@ function getLangConcepts($dbaccess, $idc)
 function getConceptsLevel($dbaccess, $idt, $level)
 {
     $s = new SearchDoc($dbaccess, "THCONCEPT");
-    $s->addFilter("thc_thesaurus='" . intval($idt) . "'");
-    $s->addFilter("thc_level <=" . intval($level));
+    $s->addFilter("thc_thesaurus='%d'", $idt);
+    $s->addFilter("thc_level <= %d", $level);
     $s->overrideViewControl();
     
     $t = $s->search();
@@ -124,7 +124,7 @@ function getConceptsLevel($dbaccess, $idt, $level)
 function getChildConcepts($dbaccess, $conid)
 {
     $s = new SearchDoc($dbaccess, "THCONCEPT");
-    $s->addFilter("thc_broader='" . intval($conid) . "'");
+    $s->addFilter("'%d' = any(thc_broader)", $conid);
     $s->overrideViewControl();
     
     $t = $s->search();
@@ -140,7 +140,7 @@ function getChildConcepts($dbaccess, $conid)
 function hasChildConcepts($dbaccess, $conid)
 {
     $s = new SearchDoc($dbaccess, "THCONCEPT");
-    $s->addFilter("thc_broader='" . intval($conid) . "'");
+    $s->addFilter("'%d' = any(thc_broader)", $conid);
     $s->slice = 1;
     $s->orderby = '';
     $s->overrideViewControl();
@@ -192,7 +192,7 @@ function getThCardinal($dbaccess, $famid, $thvalue, $aid = "")
     }
     if ($th) {
         /**
-         * @var _THESAURUS $th
+         * @var \Dcp\Family\THESAURUS $th
          */
         if (isset($dcs[$thvalue])) {
             $cardinal = $dcs[$thvalue];
